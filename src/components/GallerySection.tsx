@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
+import { ArrowRight } from "lucide-react";
 import gallery1 from "@/assets/gallery-1.jpg";
 import gallery2 from "@/assets/gallery-2.jpg";
 import gallery3 from "@/assets/gallery-3.jpg";
@@ -57,7 +59,7 @@ const GallerySection = () => {
           </h2>
         </div>
 
-        {/* Masonry Grid */}
+        {/* Masonry Grid + See more card */}
         <div className="columns-1 md:columns-2 lg:columns-3 gap-4 md:gap-6">
           {galleryItems.map((item, index) => (
             <div
@@ -70,28 +72,42 @@ const GallerySection = () => {
               <div
                 className={`${item.aspect} relative rounded-sm overflow-hidden group cursor-pointer`}
               >
-                {/* Gallery Image */}
-                <img 
-                  src={item.image} 
+                <img
+                  src={item.image}
                   alt={item.label}
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                 />
-
-                {/* Hover overlay */}
                 <div className="absolute inset-0 bg-primary/0 transition-all duration-500 group-hover:bg-primary/20" />
-
-                {/* Label on hover */}
                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500">
                   <p className="text-cream font-serif italic text-lg tracking-wider bg-background/60 px-4 py-2 backdrop-blur-sm">
                     {item.label}
                   </p>
                 </div>
-
-                {/* Border on hover */}
                 <div className="absolute inset-2 border border-primary/0 transition-all duration-500 group-hover:border-primary/50 rounded-sm" />
               </div>
             </div>
           ))}
+          {/* See more card - links to dedicated Gallery page */}
+          <div
+            className={`break-inside-avoid mb-4 md:mb-6 transition-all duration-700 ${
+              isVisible ? "opacity-100 scale-100" : "opacity-0 scale-95"
+            }`}
+            style={{ transitionDelay: `${galleryItems.length * 100}ms` }}
+          >
+            <Link
+              to="/gallery"
+              className="aspect-[3/4] relative flex flex-col items-center justify-center rounded-sm overflow-hidden group border border-primary/30 bg-secondary/50 hover:bg-secondary/70 hover:border-primary/50 transition-all duration-300"
+            >
+              <div className="absolute inset-0 bg-primary/0 group-hover:bg-primary/10 transition-colors duration-300" />
+              <ArrowRight className="w-12 h-12 text-primary mb-4 relative z-10 group-hover:translate-x-1 transition-transform duration-300" />
+              <span className="font-serif italic text-primary text-lg md:text-xl tracking-wider relative z-10">
+                See more
+              </span>
+              <span className="text-muted-foreground text-sm mt-2 relative z-10">
+                Full gallery
+              </span>
+            </Link>
+          </div>
         </div>
       </div>
     </section>
