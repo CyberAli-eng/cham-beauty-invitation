@@ -87,7 +87,7 @@ const JourneySection = () => {
           >
             <div className="relative aspect-[3/4] rounded-sm overflow-hidden">
               <img 
-                src="/cham-thai.png"
+                src="/cham-thai.jpeg"
                 alt="Cham Thai - Founder & Visionary" 
                 className="w-full h-full object-cover object-top"
               />
