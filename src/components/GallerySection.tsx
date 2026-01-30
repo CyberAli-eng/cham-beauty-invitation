@@ -1,20 +1,20 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
-import gallery1 from "@/assets/gallery-1.jpg";
-import gallery2 from "@/assets/gallery-2.jpg";
-import gallery3 from "@/assets/gallery-3.jpg";
-import gallery4 from "@/assets/gallery-4.jpg";
-import gallery5 from "@/assets/gallery-5.jpg";
-import gallery6 from "@/assets/gallery-6.jpg";
+import img1 from "@/assets/1.jpg";
+import img2 from "@/assets/2.jpeg";
+import img3 from "@/assets/3.jpg";
+import img4 from "@/assets/4.jpg";
+import img5 from "@/assets/5.jpg";
+import img6 from "@/assets/6.jpg";
 
 const galleryItems = [
-  { id: 1, aspect: "aspect-[3/4]", label: "Exclusive Launch", image: gallery1 },
-  { id: 2, aspect: "aspect-square", label: "Creator Meetup", image: gallery2 },
-  { id: 3, aspect: "aspect-[4/3]", label: "VIP Lounge", image: gallery3 },
-  { id: 4, aspect: "aspect-[4/3]", label: "Networking Night", image: gallery4 },
-  { id: 5, aspect: "aspect-square", label: "Brand Showcase", image: gallery5 },
-  { id: 6, aspect: "aspect-[3/4]", label: "Fashion Forward", image: gallery6 },
+  { id: 1, aspect: "aspect-[3/4]", label: "Gallery", image: img1 },
+  { id: 2, aspect: "aspect-square", label: "Gallery", image: img2 },
+  { id: 3, aspect: "aspect-[4/3]", label: "Gallery", image: img3 },
+  { id: 4, aspect: "aspect-[4/3]", label: "Gallery", image: img4 },
+  { id: 5, aspect: "aspect-square", label: "Gallery", image: img5 },
+  // { id: 6, aspect: "aspect-[3/4]", label: "Gallery", image: img6 },
 ];
 
 const GallerySection = () => {
