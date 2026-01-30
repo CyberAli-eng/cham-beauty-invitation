@@ -310,17 +310,17 @@
   transform: scale(0.98);
 }
 
-/* Compact 3D carousel for grid (4 carousels) – mobile first */
+/* Compact 3D carousel – mobile first; allow vertical scroll (pan-y) so page scroll works */
 .gallery-3d-stage-compact {
   perspective: 1000px;
   perspective-origin: 50% 50%;
-  min-height: 220px;
+  min-height: 200px;
   display: flex;
   align-items: center;
   justify-content: center;
   user-select: none;
   -webkit-user-select: none;
-  touch-action: none;
+  touch-action: pan-y;
   -webkit-touch-callout: none;
 }
 
@@ -333,21 +333,23 @@
 @media (min-width: 768px) {
   .gallery-3d-stage-compact {
     min-height: 280px;
+    touch-action: none;
   }
 }
 
 .gallery-3d-ring-compact {
   position: relative;
   width: 100%;
-  height: 200px;
+  height: 180px;
   transform-style: preserve-3d;
-  transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   will-change: transform;
 }
 
 @media (min-width: 640px) {
   .gallery-3d-ring-compact {
     height: 240px;
+    transition-duration: 0.5s;
   }
 }
 

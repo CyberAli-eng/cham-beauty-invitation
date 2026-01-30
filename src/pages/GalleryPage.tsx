@@ -153,6 +153,7 @@ const VIDEO_CAROUSEL = { id: 4, title: "Videos", items: VIDEO_ITEMS, isVideo: tr
 const CAROUSELS = [...IMAGE_CAROUSELS, VIDEO_CAROUSEL];
 
 const RADIUS_COMPACT = 180;
+const DRAG_THRESHOLD_PX = 12; // horizontal movement above this = carousel drag; else allow scroll
 
 type LightboxState = { carouselId: number; index: number } | null;
 
@@ -163,6 +164,9 @@ const GalleryPage = () => {
   const [dragging, setDragging] = useState<number | null>(null);
   const dragStart = useRef({ x: 0, carouselId: 0, rotation: 0 });
   const isDraggingRef = useRef(false);
+  const touchStartRef = useRef<{ x: number; y: number; carouselId: number } | null>(null);
+  const touchCommittedRef = useRef(false);
+  const rafScheduledRef = useRef(false);
 
   useEffect(() => {
     isDraggingRef.current = dragging !== null;
@@ -176,24 +180,34 @@ const GalleryPage = () => {
     });
   }, []);
 
-  const handleDragStart = (carouselId: number, clientX: number) => {
+  const handleDragStart = useCallback((carouselId: number, clientX: number) => {
     setDragging(carouselId);
     dragStart.current = { x: clientX, carouselId, rotation: rotations[carouselId] };
-  };
+  }, [rotations]);
 
-  const handleDragMove = (clientX: number) => {
-    if (dragging === null) return;
+  const handleDragMove = useCallback((clientX: number) => {
     const { carouselId, rotation } = dragStart.current;
     const dx = clientX - dragStart.current.x;
     dragStart.current.x = clientX;
-    setRotations((r) => {
-      const next = [...r];
-      next[carouselId] = rotation + dx * 0.5;
-      return next;
-    });
-  };
+    dragStart.current.rotation = rotation + dx * 0.5;
+    if (!rafScheduledRef.current) {
+      rafScheduledRef.current = true;
+      requestAnimationFrame(() => {
+        setRotations((r) => {
+          const next = [...r];
+          next[dragStart.current.carouselId] = dragStart.current.rotation;
+          return next;
+        });
+        rafScheduledRef.current = false;
+      });
+    }
+  }, []);
 
-  const handleDragEnd = () => setDragging(null);
+  const handleDragEnd = useCallback(() => {
+    setDragging(null);
+    touchStartRef.current = null;
+    touchCommittedRef.current = false;
+  }, []);
 
   useEffect(() => {
     if (dragging === null) return;
@@ -212,18 +226,43 @@ const GalleryPage = () => {
       window.removeEventListener("mouseup", onUp);
       window.removeEventListener("touchmove", onTouchMove);
     };
-  }, [dragging, rotations]);
+  }, [dragging, handleDragMove, handleDragEnd]);
 
   const onPointerDown = (carouselId: number) => (e: React.MouseEvent | React.TouchEvent) => {
-    const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
     if ("button" in e && e.button !== 0) return;
-    handleDragStart(carouselId, clientX);
+    if ("touches" in e) {
+      touchStartRef.current = {
+        x: e.touches[0].clientX,
+        y: e.touches[0].clientY,
+        carouselId,
+      };
+      touchCommittedRef.current = false;
+    } else {
+      handleDragStart(carouselId, e.clientX);
+    }
   };
-  const onPointerMove = (e: React.TouchEvent) => {
-    if (!isDraggingRef.current) return;
+
+  const onTouchMove = useCallback((e: React.TouchEvent, carouselId: number) => {
+    const t = touchStartRef.current;
+    if (!t || t.carouselId !== carouselId) return;
+    const clientX = e.touches[0].clientX;
+    const clientY = e.touches[0].clientY;
+    const deltaX = clientX - t.x;
+    const deltaY = clientY - t.y;
+    if (!touchCommittedRef.current) {
+      if (Math.abs(deltaX) > DRAG_THRESHOLD_PX && Math.abs(deltaX) > Math.abs(deltaY)) {
+        touchCommittedRef.current = true;
+        setDragging(carouselId);
+        dragStart.current = { x: clientX, carouselId, rotation: rotations[carouselId] };
+        e.preventDefault();
+        handleDragMove(clientX);
+      }
+      return;
+    }
     e.preventDefault();
-    handleDragMove(e.touches[0].clientX);
-  };
+    handleDragMove(clientX);
+  }, [handleDragMove, rotations]);
+
   const onPointerUp = () => handleDragEnd();
 
   useEffect(() => {
@@ -285,10 +324,10 @@ const GalleryPage = () => {
                   {carousel.title}
                 </h2>
                 <div
-                  className={`gallery-3d-stage-compact touch-none select-none ${dragging === carousel.id ? "cursor-grabbing" : "cursor-grab"}`}
+                  className={`gallery-3d-stage-compact select-none ${dragging === carousel.id ? "cursor-grabbing" : "cursor-grab"}`}
                   onMouseDown={(e) => e.button === 0 && handleDragStart(carousel.id, e.clientX)}
                   onTouchStart={onPointerDown(carousel.id)}
-                  onTouchMove={onPointerMove}
+                  onTouchMove={(e) => onTouchMove(e, carousel.id)}
                   onTouchEnd={onPointerUp}
                   onTouchCancel={onPointerUp}
                 >
@@ -361,10 +400,10 @@ const GalleryPage = () => {
                 {VIDEO_CAROUSEL.title}
               </h2>
               <div
-                className={`gallery-3d-stage-compact touch-none select-none ${dragging === VIDEO_CAROUSEL.id ? "cursor-grabbing" : "cursor-grab"}`}
+                className={`gallery-3d-stage-compact select-none ${dragging === VIDEO_CAROUSEL.id ? "cursor-grabbing" : "cursor-grab"}`}
                 onMouseDown={(e) => e.button === 0 && handleDragStart(VIDEO_CAROUSEL.id, e.clientX)}
                 onTouchStart={onPointerDown(VIDEO_CAROUSEL.id)}
-                onTouchMove={onPointerMove}
+                onTouchMove={(e) => onTouchMove(e, VIDEO_CAROUSEL.id)}
                 onTouchEnd={onPointerUp}
                 onTouchCancel={onPointerUp}
               >
