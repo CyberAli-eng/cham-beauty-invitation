@@ -1,0 +1,2 @@
+# SPA fallback: serve index.html for all routes so /gallery etc. work when opened in new tab or refreshed
+/*    /index.html   200
