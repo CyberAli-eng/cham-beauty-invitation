@@ -51,22 +51,17 @@ const JourneySection = () => {
 
             <div className="space-y-6 text-muted-foreground leading-relaxed">
               <p>
-                In 2010, Cham Thai graced the runways of Assam, a young model with 
-                dreams as vast as the Brahmaputra. The fashion world was her first 
-                canvas, but destiny had grander plans.
+              Cham Thai is a model turned entrepreneur who began her journey as a runway model from North East India. The fashion world was her first canvas, where she honed her creativity, confidence, and stage presence. 
               </p>
               <p>
-                Moving to Delhi marked a transformation — from walking the ramp to 
-                building empires. As a fashion entrepreneur, Cham discovered that 
-                true luxury isn't just about what you wear, but the connections 
-                you cultivate.
+              Over the years, her passion and perseverance led her to explore multiple roles within the industry, expanding beyond the ramp into leadership, vision, and entrepreneurship.
               </p>
+              <p>While fashion shaped her beginnings, destiny had grander plans, guiding her toward building her own identity as a strong, independent woman and a brand creator with purpose.</p>
               <p className="text-foreground font-medium">
-                Today, Cham Events is the manifestation of that vision — creating 
-                spaces where creators don't just network, they{" "}
-                <span className="text-primary italic">thrive</span>.
+              Today, Cham Events is the manifestation of that vision, creating spaces where creators don't just network, they <span className="text-primary italic">thrive</span>.
               </p>
             </div>
+            
 
             {/* Quote */}
             <blockquote className="border-l-2 border-primary pl-6 py-2">

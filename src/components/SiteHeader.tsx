@@ -35,7 +35,7 @@ const SiteHeader = () => {
           to="/"
           className="text-primary tracking-[0.25em] text-sm font-medium uppercase hover:opacity-80 transition-opacity"
         >
-          Cham Events
+          {/* Cham Events */}
         </Link>
         <nav className="flex items-center gap-2 sm:gap-4">
           <Button
