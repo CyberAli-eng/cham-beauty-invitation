@@ -81,7 +81,7 @@ const formSchema = z
     residenceAddress: z
       .string()
       .trim()
-      .min(15, "Please enter a complete address (at least 15 characters)")
+      .min(1, "Residence address is required")
       .max(500)
       .refine((val) => ADDRESS_REGEX.test(val), "Address can only contain letters, numbers, spaces and basic punctuation"),
     niche: z

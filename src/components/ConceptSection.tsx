@@ -6,19 +6,19 @@ const concepts = [
     icon: Users,
     title: "Exclusive Networking",
     description:
-      "Connect with top-tier creators, brands, and industry leaders in an intimate setting curated for meaningful collaborations.",
+      "Connect with top tier creators, brands, and industry leaders in an intimate setting curated for meaningful collaborations.",
   },
   {
     icon: Camera,
     title: "Content-Ready Zones",
     description:
-      "Every corner is designed with aesthetics in mind — perfect backdrops crafted for viral reels and stunning content creation.",
+      "Every corner is designed with aesthetics in mind, perfect backdrops crafted for viral reels and stunning content creation.",
   },
   {
     icon: Sparkles,
     title: "Zero Cost",
     description:
-      "VIP access without the price tag. Our events are completely free for selected creators — because talent shouldn't pay to shine.",
+      "VIP access without the price tag. Our events are completely free for selected creators, because talent shouldn't pay to shine.",
   },
 ];
 
