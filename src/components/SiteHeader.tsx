@@ -33,9 +33,16 @@ const SiteHeader = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16 md:h-20">
         <Link
           to="/"
-          className="text-primary tracking-[0.25em] text-sm font-medium uppercase hover:opacity-80 transition-opacity"
+          className="flex items-center gap-3 hover:opacity-80 transition-opacity"
         >
-          {/* Cham Events */}
+          <img
+            src="/cham-BEAUTY-logo.svg"
+            alt="Cham Beauty Logo"
+            className="w-20 md:w-24 md:h-24 object-contain"
+          />
+          <span className="text-primary tracking-[0.25em] text-sm font-medium uppercase hidden sm:inline-block">
+            {/* Cham Events */}
+          </span>
         </Link>
         <nav className="flex items-center gap-2 sm:gap-4">
           <Button
