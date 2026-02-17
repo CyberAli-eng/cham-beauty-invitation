@@ -6,23 +6,23 @@
 
 const SHEET_NAME = "Guestlist";
 
-// Validation limits
-const MAX_FULL_NAME = 100;
-const MAX_INSTAGRAM_HANDLES = 200;
-const MAX_INSTAGRAM_FOLLOWERS = 999999999;
-const MAX_SNAPCHAT = 50;
-const MAX_YOUTUBE = 500;
-const MIN_ADDRESS_LENGTH = 15;
-const MAX_ADDRESS_LENGTH = 500;
-const MAX_NICHE_OTHER = 50;
+// Validation limits removed or significantly increased
+const MAX_FULL_NAME = 1000;
+const MAX_INSTAGRAM_HANDLES = 1000;
+const MAX_INSTAGRAM_FOLLOWERS = 999999999999;
+const MAX_SNAPCHAT = 500;
+const MAX_YOUTUBE = 2000;
+const MIN_ADDRESS_LENGTH = 1;
+const MAX_ADDRESS_LENGTH = 5000;
+const MAX_NICHE_OTHER = 500;
 const VALID_NICHES = ["fashion", "beauty", "tech", "lifestyle", "travel", "food", "fitness", "entertainment", "business", "other"];
-const WHATSAPP_REGEX = /^\+?[0-9]{10,15}$/;
-const NAME_REGEX = /^[a-zA-Z\u00C0-\u024F\s\-'.]+$/;
-const INSTAGRAM_HANDLE_REGEX = /^[@a-zA-Z0-9_.\s,]+$/;
-const SNAPCHAT_HANDLE_REGEX = /^[@a-zA-Z0-9_.\s]*$/;
-const ADDRESS_REGEX = /^[a-zA-Z0-9\u00C0-\u024F\s,.\-\n]+$/;
-const NICHE_OTHER_REGEX = /^[a-zA-Z\s]+$/;
-const YOUTUBE_URL_REGEX = /^https?:\/\/(www\.)?(youtube\.com|youtu\.be)\/[^\s]+$/i;
+const WHATSAPP_REGEX = /^\+?[0-9\s-]+$/;
+const NAME_REGEX = /.*/;
+const INSTAGRAM_HANDLE_REGEX = /.*/;
+const SNAPCHAT_HANDLE_REGEX = /.*/;
+const ADDRESS_REGEX = /.*/;
+const NICHE_OTHER_REGEX = /.*/;
+const YOUTUBE_URL_REGEX = /.*/; // Relaxed
 
 function doPost(e) {
   try {

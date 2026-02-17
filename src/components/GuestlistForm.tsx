@@ -13,6 +13,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { CheckCircle2 } from "lucide-react";
 import { z } from "zod";
+import { SuccessState, ExpectationsCard } from "./GuestlistFormSubComponents";
 
 const niches = [
   "Fashion",
@@ -29,18 +30,18 @@ const niches = [
 
 const VALID_NICHE_VALUES = new Set(niches.map((n) => n.toLowerCase()));
 
-/** Allow letters (incl. accented), spaces, hyphens, apostrophes, one dot (e.g. Jr.) */
-const NAME_REGEX = /^[\p{L}\p{M}\s\-'.]+$/u;
-/** Instagram: @ optional, letters, numbers, underscores, dots, commas (e.g. or @handle1, @handle2) */
-const INSTAGRAM_HANDLE_REGEX = /^[@a-zA-Z0-9_.\s,]+$/;
-/** Snapchat: @ optional, letters, numbers, underscores (e.g. @username) */
-const SNAPCHAT_HANDLE_REGEX = /^[@a-zA-Z0-9_.\s]*$/;
-/** WhatsApp: optional + then digits only */
-const WHATSAPP_REGEX = /^\+?[0-9]{10,15}$/;
-/** Address: letters, numbers, spaces, commas, periods, hyphens, newlines; no < > or script-like */
-const ADDRESS_REGEX = /^[\p{L}\p{N}\s,.\-\n]+$/u;
-/** Niche other: letters and spaces only */
-const NICHE_OTHER_REGEX = /^[a-zA-Z\s]+$/;
+/** Name: no restrictive regex */
+const NAME_REGEX = /.+/;
+/** Instagram: @ optional */
+const INSTAGRAM_HANDLE_REGEX = /.*/;
+/** Snapchat: @ optional */
+const SNAPCHAT_HANDLE_REGEX = /.*/;
+/** WhatsApp: basic digit check but no length limit */
+const WHATSAPP_REGEX = /^\+?[0-9\s-]+$/;
+/** Address: allow anything */
+const ADDRESS_REGEX = /.*/;
+/** Niche other: allow anything */
+const NICHE_OTHER_REGEX = /.*/;
 /** YouTube: when provided, must be a YouTube channel/page URL */
 const YOUTUBE_URL_REGEX = /^https?:\/\/(www\.)?(youtube\.com|youtu\.be)\/[^\s]+$/i;
 
@@ -49,52 +50,38 @@ const formSchema = z
     fullName: z
       .string()
       .trim()
-      .min(2, "Please enter your full name (at least 2 characters)")
-      .max(100)
-      .refine((val) => NAME_REGEX.test(val), "Name can only contain letters, spaces, hyphens and apostrophes"),
+      .min(2, "Please enter your full name"),
     instagramHandles: z
       .string()
       .trim()
-      .min(1, "Instagram handle(s) required")
-      .max(200)
-      .refine((val) => INSTAGRAM_HANDLE_REGEX.test(val), "Use only @, letters, numbers, underscores and commas (e.g. @shaiz or @handle1, @handle2)"),
+      .min(1, "Instagram handle(s) required"),
     instagramFollowers: z
       .string()
       .trim()
       .min(1, "Instagram followers count is required")
-      .refine((val) => /^\d+$/.test(val), "Enter digits only")
-      .refine((val) => {
-        const n = Number(val);
-        return !Number.isNaN(n) && n >= 0 && n <= 999_999_999;
-      }, "Enter a valid follower count (0–999,999,999)"),
+      .refine((val) => /^\d+$/.test(val), "Enter digits only"),
     snapchatHandle: z
       .string()
       .trim()
-      .min(1, "Snapchat handle is required")
-      .max(50)
-      .refine((val) => SNAPCHAT_HANDLE_REGEX.test(val), "Use only @, letters, numbers and underscores (e.g. @username)"),
+      .min(1, "Snapchat handle is required"),
     youtubeChannel: z
       .string()
       .trim()
-      .max(500)
-      .refine((val) => !val || YOUTUBE_URL_REGEX.test(val), "Enter a valid YouTube channel URL (e.g. https://www.youtube.com/@channel)"),
+      .refine((val) => !val || YOUTUBE_URL_REGEX.test(val), "Enter a valid YouTube channel URL"),
     residenceAddress: z
       .string()
       .trim()
-      .min(1, "Residence address is required")
-      .max(500)
-      .refine((val) => ADDRESS_REGEX.test(val), "Address can only contain letters, numbers, spaces and basic punctuation"),
+      .min(1, "Residence address is required"),
     niche: z
       .string()
       .min(1, "Please select your niche")
       .refine((val) => VALID_NICHE_VALUES.has(val), "Please select a valid niche"),
-    nicheOther: z.string().trim().max(50).optional(),
+    nicheOther: z.string().trim().optional(),
     whatsapp: z
       .string()
       .trim()
-      .min(10, "Valid WhatsApp number required (e.g. +91 9876543210)")
-      .max(15)
-      .refine((val) => WHATSAPP_REGEX.test(val.replace(/\s/g, "")), "Enter a valid number with country code (digits and + only)"),
+      .min(1, "Valid WhatsApp number required")
+      .refine((val) => WHATSAPP_REGEX.test(val.replace(/\s/g, "")), "Enter a valid number"),
     comfortableSpeakingOnCamera: z
       .boolean()
       .refine((val) => val === true, "Please confirm you are comfortable speaking on camera"),
@@ -110,20 +97,12 @@ const formSchema = z
         message: "Please specify your niche",
       });
     }
-    if (data.niche === "other" && data.nicheOther?.trim()) {
-      if (data.nicheOther.length < 2) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ["nicheOther"],
-          message: "Please enter at least 2 characters",
-        });
-      } else if (!NICHE_OTHER_REGEX.test(data.nicheOther)) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ["nicheOther"],
-          message: "Use only letters and spaces",
-        });
-      }
+    if (data.niche === "other" && !data.nicheOther?.trim()) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["nicheOther"],
+        message: "Please specify your niche",
+      });
     }
   });
 
@@ -215,9 +194,11 @@ const GuestlistForm = ({ onSuccess, embedded = false }: GuestlistFormProps) => {
 
     const gasUrl = import.meta.env.VITE_GAS_WEB_APP_URL;
     if (!gasUrl) {
+      console.error("VITE_GAS_WEB_APP_URL is not defined in environment variables");
       setSubmitError(
-        "Form submission is not configured. Please set VITE_GAS_WEB_APP_URL."
+        "Service is temporarily unavailable. Please try again later or contact support."
       );
+      setIsSubmitting(false);
       return;
     }
 
@@ -264,9 +245,8 @@ const GuestlistForm = ({ onSuccess, embedded = false }: GuestlistFormProps) => {
 
       <div className="max-w-2xl mx-auto relative z-10 w-full min-w-0">
         <div
-          className={`text-center ${embedded ? "mb-6" : "mb-12"} transition-all duration-700 ${
-            showContent ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
-          }`}
+          className={`text-center ${embedded ? "mb-6" : "mb-12"} transition-all duration-700 ${showContent ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+            }`}
         >
           <p className="text-primary tracking-[0.3em] text-sm uppercase mb-4">
             The Guestlist
@@ -281,33 +261,16 @@ const GuestlistForm = ({ onSuccess, embedded = false }: GuestlistFormProps) => {
 
         {/* What we expect from you */}
         <div
-          className={`${embedded ? "mb-6" : "mb-10"} transition-all duration-700 delay-100 ${
-            showContent ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
-          }`}
+          className={`${embedded ? "mb-6" : "mb-10"} transition-all duration-700 delay-100 ${showContent ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+            }`}
         >
-          <div className="rounded-lg border border-border bg-secondary/20 p-4 sm:p-6 md:p-8 w-full min-w-0">
-            <h3 className="font-serif text-xl md:text-2xl text-foreground mb-1">
-              What we expect from you
-            </h3>
-            <p className="text-muted-foreground text-sm mb-5">
-              If selected, you’ll be asked to contribute the following:
-            </p>
-            <ol className="space-y-3 text-foreground text-sm md:text-base list-decimal list-inside">
-              <li>At least one short video Q&A</li>
-              <li>3–4 Snapchat posts</li>
-              <li>2–3 Instagram stories</li>
-              <li>Tag to Cham’s personal accounts</li>
-              <li>Tag to Velomora</li>
-              <li>Tag to cham.beauty</li>
-            </ol>
-          </div>
+          <ExpectationsCard />
         </div>
 
         {/* Form Card */}
         <div
-          className={`transition-all duration-700 delay-200 ${
-            showContent ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
-          }`}
+          className={`transition-all duration-700 delay-200 ${showContent ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+            }`}
         >
           <div className="glass rounded-lg p-4 sm:p-6 md:p-8 lg:p-12 w-full min-w-0">
             {!isSubmitted ? (
@@ -342,7 +305,6 @@ const GuestlistForm = ({ onSuccess, embedded = false }: GuestlistFormProps) => {
                     onChange={(e) =>
                       setFormData({ ...formData, fullName: e.target.value })
                     }
-                    maxLength={100}
                     className="bg-secondary/50 border-border focus:border-primary"
                   />
                   {errors.fullName && (
@@ -366,7 +328,6 @@ const GuestlistForm = ({ onSuccess, embedded = false }: GuestlistFormProps) => {
                       onChange={(e) =>
                         setFormData({ ...formData, instagramHandles: e.target.value })
                       }
-                      maxLength={200}
                       className="pl-8 bg-secondary/50 border-border focus:border-primary"
                     />
                   </div>
@@ -388,9 +349,8 @@ const GuestlistForm = ({ onSuccess, embedded = false }: GuestlistFormProps) => {
                     value={formData.instagramFollowers}
                     onChange={(e) => {
                       const v = e.target.value.replace(/\D/g, "");
-                      if (v.length <= 9) setFormData({ ...formData, instagramFollowers: v });
+                      setFormData({ ...formData, instagramFollowers: v });
                     }}
-                    maxLength={9}
                     className="bg-secondary/50 border-border focus:border-primary"
                   />
                   {errors.instagramFollowers && (
@@ -410,7 +370,6 @@ const GuestlistForm = ({ onSuccess, embedded = false }: GuestlistFormProps) => {
                     onChange={(e) =>
                       setFormData({ ...formData, snapchatHandle: e.target.value })
                     }
-                    maxLength={50}
                     className="bg-secondary/50 border-border focus:border-primary"
                   />
                   {errors.snapchatHandle && (
@@ -430,7 +389,6 @@ const GuestlistForm = ({ onSuccess, embedded = false }: GuestlistFormProps) => {
                     onChange={(e) =>
                       setFormData({ ...formData, youtubeChannel: e.target.value })
                     }
-                    maxLength={500}
                     className="bg-secondary/50 border-border focus:border-primary"
                   />
                   {errors.youtubeChannel && (
@@ -451,7 +409,6 @@ const GuestlistForm = ({ onSuccess, embedded = false }: GuestlistFormProps) => {
                       setFormData({ ...formData, residenceAddress: e.target.value })
                     }
                     rows={4}
-                    maxLength={500}
                     className="bg-secondary/50 border-border focus:border-primary resize-none"
                   />
                   {errors.residenceAddress && (
@@ -503,7 +460,6 @@ const GuestlistForm = ({ onSuccess, embedded = false }: GuestlistFormProps) => {
                             nicheOther: e.target.value,
                           })
                         }
-                        maxLength={50}
                         className="mt-1.5 w-full bg-secondary/50 border-border focus:border-primary"
                       />
                     </div>
@@ -529,9 +485,8 @@ const GuestlistForm = ({ onSuccess, embedded = false }: GuestlistFormProps) => {
                     value={formData.whatsapp}
                     onChange={(e) => {
                       const v = e.target.value.replace(/[^\d+]/g, "");
-                      if (v.length <= 16) setFormData({ ...formData, whatsapp: v });
+                      setFormData({ ...formData, whatsapp: v });
                     }}
-                    maxLength={16}
                     className="bg-secondary/50 border-border focus:border-primary"
                   />
                   {errors.whatsapp && (
@@ -613,21 +568,7 @@ const GuestlistForm = ({ onSuccess, embedded = false }: GuestlistFormProps) => {
               </form>
             ) : (
               /* Success State */
-              <div className="text-center py-8">
-                <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-primary/20 mb-6">
-                  <CheckCircle2 className="w-10 h-10 text-primary" />
-                </div>
-                <h3 className="text-2xl font-serif mb-4 text-foreground">
-                  You're on the List!
-                </h3>
-                <p className="text-muted-foreground mb-6">
-                  We've received your application. If selected, you'll receive an
-                  exclusive invite via WhatsApp.
-                </p>
-                <p className="text-primary font-serif italic">
-                  "See you at the next soirée"
-                </p>
-              </div>
+              <SuccessState />
             )}
           </div>
         </div>
